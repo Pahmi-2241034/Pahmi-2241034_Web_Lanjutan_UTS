@@ -1,0 +1,74 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+// prisma/schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Category {
+  id       Int       @id @default(autoincrement())
+  name     String
+  products Product[] // Relasi 1-to-Many dengan Product
+}
+
+model Product {
+  id          Int      @id @default(autoincrement())
+  name        String
+  price       Float
+  categoryId  Int
+  category    Category @relation(fields: [categoryId], references: [id])
+  tsupplier TSuplier[]
+  transactionout TransactionOut[]
+}
+
+model Suplier {
+  id       Int       @id @default(autoincrement())
+  name     String
+  Phone    Int
+  tsupplier TSuplier[]
+}
+
+model TSuplier {
+  id         Int       @id @default(autoincrement())
+  tgl        DateTime
+  suplierId  Int
+  suplier    Suplier   @relation(fields: [suplierId], references: [id])
+  productId  Int
+  product    Product   @relation(fields: [productId], references: [id])
+  transaction Transaction[]
+}
+
+model TransactionOut {
+  id         Int       @id @default(autoincrement())
+  tgl        DateTime
+  productId  Int
+  product    Product   @relation(fields: [productId], references: [id]) 
+  transaction Transaction[]
+}
+
+model Transaction {
+  id          Int             @id @default(autoincrement())
+  type        TransactionType
+  date        DateTime
+  transactionout    TransactionOut?  @relation(fields: [transactionoutId], references: [id])
+  transactionoutId  Int?
+  tsuplier TSuplier?       @relation(fields: [tsuplierId], references: [id])
+  tsuplierId Int?
+  
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+}
+
+enum TransactionType {
+  OUTBOUND
+  SUPPLIER
+}
